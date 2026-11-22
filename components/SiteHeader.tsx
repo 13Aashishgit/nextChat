@@ -2,10 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Button } from "./ui/button";
+import { OrganizationSwitcher, Show, SignInButton, SignUpButton, useAuth, UserButton } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
+// import { Organization } from "@clerk/nextjs/server";
 
 const SiteHeader = () => {
-  const isSignedIn = false; // Replace with your actual authentication logic
-  const isLandingPage = true; // Replace with your actual logic to determine if it's the landing page
+    const pathname = usePathname();
+
+  const {isSignedIn} = useAuth(); // Replace with your actual authentication logic
+  const isLandingPage = pathname === "/"; // Replace with your actual logic to determine if it's the landing page
   return (
     <header className="fixed top-0 z-50 w-full border-b border-gray-200 ">
       <div className="container mx-auto px-4 py-3">
@@ -43,13 +48,34 @@ const SiteHeader = () => {
               Pricing
             </Link>
           </nav>
-            
         )}
 
         <div className="absolute right-4 top-3">
-          <Button asChild variant="ghost" size="sm">
-            <Link href="/sign-in">Sign In</Link>
-          </Button>
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <Button variant="ghost" size="sm">
+                Sign In
+              </Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button variant="default" size="sm">
+                Get started
+              </Button>
+            </SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <OrganizationSwitcher 
+            afterCreateOrganizationUrl="/dashboard" 
+            afterSelectOrganizationUrl="/dashboard" 
+            
+            />
+            {isLandingPage && (
+              <Button asChild size="sm">
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+            )}
+            <UserButton/>
+          </Show>
         </div>
       </div>
     </header>
